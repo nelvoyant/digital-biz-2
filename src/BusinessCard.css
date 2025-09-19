@@ -1,0 +1,50 @@
+/* src/BusinessCard.css */
+.business-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 30px;
+  margin: 40px auto; /* Center the card and add some space */
+  max-width: 400px; /* Limit card width */
+  text-align: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.business-card h1 {
+  color: #333;
+  margin-bottom: 10px;
+  font-size: 2.2em;
+}
+
+.business-card h2 {
+  color: #555;
+  margin-bottom: 20px;
+  font-size: 1.3em;
+  font-weight: normal;
+}
+
+.business-card p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  font-size: 0.95em;
+}
+
+.social-links {
+  margin-top: 20px;
+}
+
+.social-links a {
+  display: inline-block;
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  margin: 0 10px;
+  transition: background-color 0.3s ease;
+}
+
+.social-links a:hover {
+  background-color: #0056b3;
+}
