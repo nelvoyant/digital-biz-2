@@ -1,6 +1,21 @@
 /* src/App.css */
-/* You can add global app-specific styles here if needed,
-   but for now, it can be empty or just contain the .App style. */
 .App {
-  /* Add any top-level app container styles here if needed */
+  text-align: center; /* Center content horizontally */
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center items horizontally */
+  justify-content: flex-start; /* Align items to the top initially */
+  min-height: 100vh; /* Ensure it takes full viewport height */
+  padding: 20px; /* Add some padding around */
+  box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+/* New container for card and guestbook */
+.App-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px; /* Space between the card and guestbook */
+  align-items: center;
+  max-width: 800px; /* Max width for the entire app content */
+  width: 100%;
 }

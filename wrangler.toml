@@ -1,0 +1,8 @@
+name = "digital-biz-2"
+main = "src/main.jsx" 
+compatibility_date = "2024-05-18" 
+
+[[d1_databases]]
+binding = "DB"
+database_name = "digital-biz-2-db"
+database_id = "a362c726-551e-4b2f-890d-4c75485fc4f2"
