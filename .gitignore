@@ -11,8 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
-.wrangler
-.migrations
+
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +24,7 @@ dist-ssr
 *.sln
 *.sw?
 .env
+.dev.vars
+.wrangler
+.migrations
+*.sqlite

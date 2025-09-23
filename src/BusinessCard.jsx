@@ -1,5 +1,5 @@
 // src/BusinessCard.jsx
-import React, { useState, useEffect } from "react"; // Import useState and useEffect
+import React, { useState, useEffect } from "react";
 import "./BusinessCard.css";
 
 function BusinessCard() {
@@ -8,10 +8,12 @@ function BusinessCard() {
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null); // New state for logged-in user
 
   const API_ENDPOINT = "/api/messages"; // Our Cloudflare Function endpoint
+  const GITHUB_CLIENT_ID = "Ov23liIeEEyRM8yBzqsY"; // <--- IMPORTANT: Replace with your actual GitHub Client ID
 
-  // Function to fetch messages from the API
+  // Function to fetch messages from the API (remains the same)
   const fetchMessages = async () => {
     setLoading(true);
     setError(null);
@@ -30,15 +32,15 @@ function BusinessCard() {
     }
   };
 
-  // useEffect hook to fetch messages when the component mounts
   useEffect(() => {
     fetchMessages();
-  }, []); // Empty dependency array means this runs once on mount
+    // Later: Add a call here to check login status
+  }, []);
 
-  // Function to handle new message submission
+  // Function to handle new message submission (remains the same for now)
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission behavior
-    setError(null); // Clear previous errors
+    e.preventDefault();
+    setError(null);
 
     if (!newName.trim() || !newMessage.trim()) {
       setError("Name and Message cannot be empty.");
@@ -50,6 +52,7 @@ function BusinessCard() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          // Later: Add authorization header if user is logged in
         },
         body: JSON.stringify({ name: newName, message: newMessage }),
       });
@@ -61,7 +64,6 @@ function BusinessCard() {
         );
       }
 
-      // If successful, clear the form and re-fetch messages
       setNewName("");
       setNewMessage("");
       fetchMessages();
@@ -69,6 +71,29 @@ function BusinessCard() {
       setError("Failed to post message: " + err.message);
       console.error("Error posting message:", err);
     }
+  };
+
+  // Function to redirect to GitHub for login
+  const handleLoginWithGitHub = () => {
+    // The redirect URL where GitHub sends the user back after authorization
+    // This MUST match the "Authorization callback URL" you set in your GitHub OAuth App
+    const redirectUri = encodeURIComponent(
+      "https://digital-biz-2.pages.dev/api/auth/callback"
+    );
+
+    // GitHub's authorization endpoint
+    window.location.href =
+      `https://github.com/login/oauth/authorize?` +
+      `client_id=${GITHUB_CLIENT_ID}&` +
+      `redirect_uri=${redirectUri}&` +
+      `scope=user:email`; // Request user's email access
+  };
+
+  // Placeholder for future logout function
+  const handleLogout = () => {
+    console.log("Logout functionality not yet implemented.");
+    setUser(null); // For now, just clear local user state
+    // Later: Make an API call to invalidate session
   };
 
   return (
@@ -89,6 +114,27 @@ function BusinessCard() {
         <a href="#" target="_blank" rel="noopener noreferrer">
           Twitter
         </a>
+      </div>
+      <hr style={{ margin: "40px 0", borderColor: "#eee" }} />
+      {/* Authentication Section */}
+      <div className="auth-section">
+        {user ? (
+          <div className="logged-in-status">
+            <p>
+              Logged in as: <strong>{user.name || user.login}</strong>
+            </p>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={handleLoginWithGitHub}
+            className="github-login-button"
+          >
+            Login with GitHub
+          </button>
+        )}
       </div>
       <hr style={{ margin: "40px 0", borderColor: "#eee" }} />
       {/* Guestbook Section */}

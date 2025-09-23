@@ -95,3 +95,60 @@
   padding: 10px;
   margin-bottom: 20px;
 }
+
+/* src/BusinessCard.css - Add to the end of the file */
+
+.auth-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.github-login-button {
+  background-color: #24292e; /* GitHub's brand color */
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.github-login-button:hover {
+  background-color: #000000;
+}
+
+/* (Optional) Add a GitHub Octocat icon using an SVG or font-awesome if you like */
+/* .github-login-button::before {
+  content: url('data:image/svg+xml,...'); // Insert GitHub SVG here
+  height: 1.2em;
+  width: 1.2em;
+  display: inline-block;
+  vertical-align: middle;
+} */
+
+.logged-in-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  color: #333;
+  font-size: 1em;
+}
+
+.logout-button {
+  background-color: #dc3545; /* Red for logout */
+  color: white;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+}
