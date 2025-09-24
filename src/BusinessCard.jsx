@@ -75,18 +75,24 @@ function BusinessCard() {
 
   // Function to redirect to GitHub for login
   const handleLoginWithGitHub = () => {
+    // Dynamically get the base URL of the current page for the redirect URI
+    // window.location.origin will be http://localhost:5173 locally
+    // and https://digital-biz-2.pages.dev in production
+    const currentOrigin = window.location.origin;
+
     // The redirect URL where GitHub sends the user back after authorization
-    // This MUST match the "Authorization callback URL" you set in your GitHub OAuth App
+    // This MUST match what's registered in your GitHub OAuth App for production,
+    // AND what we'll register for local development.
     const redirectUri = encodeURIComponent(
-      "https://digital-biz-2.pages.dev/api/auth/callback"
-    );
+      `${currentOrigin}/api/auth/callback`
+    ); // <--- UPDATED LINE
 
     // GitHub's authorization endpoint
     window.location.href =
       `https://github.com/login/oauth/authorize?` +
-      `client_id=${GITHUB_CLIENT_ID}&` +
+      `client_id=${GITHUB_CLIENT_ID}&` + // GITHUB_CLIENT_ID is still hardcoded for this step, will improve later
       `redirect_uri=${redirectUri}&` +
-      `scope=user:email`; // Request user's email access
+      `scope=user:email`;
   };
 
   // Placeholder for future logout function
