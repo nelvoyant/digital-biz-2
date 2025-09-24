@@ -14,7 +14,7 @@ export async function onRequest(context) {
   const GITHUB_CLIENT_ID = env.GITHUB_CLIENT_ID;
   const GITHUB_CLIENT_SECRET = env.GITHUB_CLIENT_SECRET;
   // Use the Pages.dev URL as the REDIRECT_URI for consistency
-  const REDIRECT_URI = `${url.protocol}//${url.hostname}/api/auth/callback`; // Dynamically get hostname for local/prod
+  const REDIRECT_URI = env.GITHUB_REDIRECT_URI; // Correct Line
   console.log(REDIRECT_URI);
   try {
     // 1. Exchange the code for an access token
@@ -43,12 +43,22 @@ export async function onRequest(context) {
       );
     }
 
-    const { access_token } = await tokenResponse.json();
+    const tokenData = await tokenResponse.json();
+
+    // LOG THE ENTIRE RESPONSE FROM GITHUB
+    console.log(
+      "GitHub Token Response Body:",
+      JSON.stringify(tokenData, null, 2)
+    );
+
+    const { access_token } = tokenData;
 
     if (!access_token) {
-      throw new Error("No access token received from GitHub");
+      // We can even make our error more specific now
+      const errorDescription =
+        tokenData.error_description || "No access token in response";
+      throw new Error(`Failed to get access token: ${errorDescription}`);
     }
-
     // 2. Use the access token to fetch user profile data
     const userResponse = await fetch("https://api.github.com/user", {
       headers: {

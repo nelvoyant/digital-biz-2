@@ -3,58 +3,76 @@ import React, { useState, useEffect } from "react";
 import "./BusinessCard.css";
 
 function BusinessCard() {
+  // ... (state variables: messages, newName, newMessage, error, loading, user)
   const [messages, setMessages] = useState([]);
-  const [newName, setNewName] = useState("");
   const [newMessage, setNewMessage] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null); // New state for logged-in user
+  const [user, setUser] = useState(null); // This is key!
 
-  const API_ENDPOINT = "/api/messages"; // Our Cloudflare Function endpoint
-  const GITHUB_CLIENT_ID = "Ov23liIeEEyRM8yBzqsY"; // <--- IMPORTANT: Replace with your actual GitHub Client ID
+  const GITHUB_CLIENT_ID = "Ov23liIeEEyRM8yBzqsY"; // Your actual Client ID
 
-  // Function to fetch messages from the API (remains the same)
+  // NEW: Function to check login status when the app loads
+  const checkLoginStatus = async () => {
+    try {
+      const response = await fetch("/api/auth/status", {
+        credentials: "include", // IMPORTANT: Must include credentials to send the cookie
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user); // Set the user state if logged in
+      } else {
+        setUser(null); // Ensure user is null if not logged in
+      }
+    } catch (err) {
+      console.error("Error checking login status:", err);
+      setUser(null);
+    }
+  };
+
   const fetchMessages = async () => {
+    // ... (fetchMessages function remains the same)
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(API_ENDPOINT);
-      if (!response.ok) {
+      const response = await fetch("/api/messages");
+      if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      }
       const data = await response.json();
       setMessages(data);
     } catch (err) {
       setError("Failed to fetch messages: " + err.message);
-      console.error("Error fetching messages:", err);
     } finally {
       setLoading(false);
     }
   };
 
+  // UPDATED: useEffect now calls both functions on initial load
   useEffect(() => {
-    fetchMessages();
-    // Later: Add a call here to check login status
-  }, []);
+    // We want to check login status first, then fetch messages
+    const initialize = async () => {
+      await checkLoginStatus();
+      await fetchMessages();
+    };
+    initialize();
+  }, []); // Empty array means this runs only once when the component mounts
 
-  // Function to handle new message submission (remains the same for now)
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // ... (handleSubmit function updated to use credentials: 'include')
     setError(null);
-
-    if (!newName.trim() || !newMessage.trim()) {
-      setError("Name and Message cannot be empty.");
+    if (!newMessage.trim()) {
+      setError("Message cannot be empty.");
       return;
     }
 
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const response = await fetch("/api/messages", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          // Later: Add authorization header if user is logged in
-        },
-        body: JSON.stringify({ name: newName, message: newMessage }),
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // This allows the session cookie to be sent
+        body: JSON.stringify({ message: newMessage }), // Name is no longer needed
       });
 
       if (!response.ok) {
@@ -64,52 +82,40 @@ function BusinessCard() {
         );
       }
 
-      setNewName("");
       setNewMessage("");
-      fetchMessages();
+      fetchMessages(); // Re-fetch messages to show the new one
     } catch (err) {
       setError("Failed to post message: " + err.message);
-      console.error("Error posting message:", err);
     }
   };
 
-  // Function to redirect to GitHub for login
   const handleLoginWithGitHub = () => {
-    // Dynamically get the base URL of the current page for the redirect URI
-    // window.location.origin will be http://localhost:5173 locally
-    // and https://digital-biz-2.pages.dev in production
+    // ... (handleLoginWithGitHub function remains the same)
     const currentOrigin = window.location.origin;
-
-    // The redirect URL where GitHub sends the user back after authorization
-    // This MUST match what's registered in your GitHub OAuth App for production,
-    // AND what we'll register for local development.
     const redirectUri = encodeURIComponent(
       `${currentOrigin}/api/auth/callback`
-    ); // <--- UPDATED LINE
-
-    // GitHub's authorization endpoint
-    window.location.href =
-      `https://github.com/login/oauth/authorize?` +
-      `client_id=${GITHUB_CLIENT_ID}&` + // GITHUB_CLIENT_ID is still hardcoded for this step, will improve later
-      `redirect_uri=${redirectUri}&` +
-      `scope=user:email`;
+    );
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${redirectUri}&scope=user:email`;
   };
 
-  // Placeholder for future logout function
-  const handleLogout = () => {
-    console.log("Logout functionality not yet implemented.");
-    setUser(null); // For now, just clear local user state
-    // Later: Make an API call to invalidate session
+  // NEW: Fully implemented Logout function
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include", // Must include credentials to send the cookie
+      });
+      setUser(null); // Clear the user from state
+    } catch (err) {
+      console.error("Error logging out:", err);
+    }
   };
 
   return (
     <div className="business-card">
-      <h1>Your Name</h1> {/* Update with your name */}
-      <h2>Your Title / Profession</h2> {/* Update with your title */}
-      <p>
-        This is a simple digital business card. You can add more details here,
-        like a short bio or a mission statement.
-      </p>
+      {/* ... (Your Name, Title, Social Links) ... */}
+      <h1>Your Name</h1>
+      <h2>Your Title / Profession</h2>
       <div className="social-links">
         <a href="#" target="_blank" rel="noopener noreferrer">
           LinkedIn
@@ -122,7 +128,8 @@ function BusinessCard() {
         </a>
       </div>
       <hr style={{ margin: "40px 0", borderColor: "#eee" }} />
-      {/* Authentication Section */}
+
+      {/* Authentication Section - This will now be dynamic! */}
       <div className="auth-section">
         {user ? (
           <div className="logged-in-status">
@@ -138,46 +145,42 @@ function BusinessCard() {
             onClick={handleLoginWithGitHub}
             className="github-login-button"
           >
-            Login with GitHub
+            Login with GitHub to Post
           </button>
         )}
       </div>
       <hr style={{ margin: "40px 0", borderColor: "#eee" }} />
+
       {/* Guestbook Section */}
       <div className="guestbook-section">
         <h3>Guestbook</h3>
-
         {error && (
           <p className="error-message" style={{ color: "red" }}>
             {error}
           </p>
         )}
 
-        {/* Message Submission Form */}
-        <form onSubmit={handleSubmit} className="message-form">
-          <input
-            type="text"
-            placeholder="Your Name"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            required
-          />
-          <textarea
-            placeholder="Your Message"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            rows="3"
-            required
-          ></textarea>
-          <button type="submit">Send Message</button>
-        </form>
+        {/* Message Submission Form - Now it only shows if you're logged in */}
+        {user ? (
+          <form onSubmit={handleSubmit} className="message-form">
+            <textarea
+              placeholder="Your Message"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              rows="3"
+              required
+            ></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        ) : (
+          <p>Please log in to leave a message.</p>
+        )}
 
         {/* Display Messages */}
+        {/* ... (messages-list JSX remains the same) ... */}
         <div className="messages-list">
           {loading ? (
             <p>Loading messages...</p>
-          ) : messages.length === 0 ? (
-            <p>No messages yet. Be the first to leave one!</p>
           ) : (
             messages.map((msg) => (
               <div key={msg.id} className="message-item">
